@@ -33,16 +33,18 @@ export const Home = () => {
   }
 
   return (
-    <div className="p-4">
-      <h1>Welcome {user.firstName}</h1>
-      <Button type="button" onClick={logout}>
-        Logout
-      </Button>
-      {roles.includes('admin') && (
-        <Button type="button" onClick={() => navigate('/admin')}>
-          Admin
+    <div>
+      <div className="p-4 grid grid-flow-col block bg-gray-500 text-white">
+        <h1 className="text-4xl">Welcome {user.firstName}</h1>
+        <Button type="button" onClick={logout}>
+          Logout
         </Button>
-      )}
+        {roles.includes('admin') && (
+          <Button type="button" onClick={() => navigate('/admin')}>
+            Admin
+          </Button>
+        )}
+      </div>
       <section>
         <Ping />
       </section>

@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { Body, UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { GatewayJwtBody } from 'server/decorators/gateway_jwt_body.decorator';
 import { JwtBodyDto } from 'server/dto/jwt_body.dto';
@@ -54,6 +54,16 @@ export class PingGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @GatewayJwtBody() jwtBody: JwtBodyDto,
   ) {
     this.server.to(payload.currentRoom).emit('pong', { message: { userId: jwtBody.userId } });
+    console.log(client.rooms);
+  }
+
+  @SubscribeMessage('message')
+  public handleMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: PingPayload,
+    @GatewayJwtBody() jwtBody: JwtBodyDto,
+  ) {
+    this.server.to(payload.currentRoom).emit('message', { message: { userId: jwtBody.userId, payload } });
     console.log(client.rooms);
   }
 

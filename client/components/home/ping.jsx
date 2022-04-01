@@ -9,6 +9,8 @@ export const Ping = () => {
   const [currentRoom, setCurrentRoom] = useState(null);
   const [authToken] = useContext(AuthContext);
   const [socket, setSocket] = useState(null);
+  const [message, setMessage] = useState('');
+  const [allMessages, setAllMessages] = useState([]);
 
   useEffect(() => {
     // instantiates a socket object and initiates the connection...
@@ -31,6 +33,17 @@ export const Ping = () => {
     // recieved a pong event from the server
     socket.on('pong', (data) => {
       console.log('Recieved pong', data);
+    });
+
+    // recieved a message event from the server
+    socket.on('message', (data) => {
+      console.log('Recieved message', data);
+      console.log(data.message.payload.message);
+      var messagesDiv = document.getElementById('Messages');
+      const p = document.createElement('p');
+      p.innerHTML = 'User: ' + data.message.userId + ' says "' + data.message.payload.message + '"';
+      p.className = "p-1 m-1 bg-gray-300"
+      messagesDiv.appendChild(p);
     });
 
     // IMPORTANT! Unregister from all events when the component unmounts and disconnect.
@@ -58,6 +71,11 @@ export const Ping = () => {
     currentRoom && socket.emit('ping', { currentRoom });
   };
 
+  const sendMessage = () => {
+    // sends a ping to the server to be broadcast to everybody in the room
+    currentRoom && socket.emit('message', { currentRoom, message });
+  };
+
   const joinRoom = () => {
     // tells the server to remove the current client from the current room and add them to the new room
     socket.emit('join-room', { currentRoom, newRoom: key }, (response) => {
@@ -68,17 +86,34 @@ export const Ping = () => {
 
   return (
     <>
-      <header>Ping: {currentRoom || '(No room joined)'}</header>
-      <section>
-        <input
-          type="text"
-          className="border-2 border-gray-700 p-2 rounded"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-        />
-        <Button onClick={joinRoom}>Connect To Room</Button>
-        <Button onClick={sendPing}>Send Ping</Button>
-      </section>
+      <div className="p-3">
+        <header>Ping: {currentRoom || '(No room joined)'}</header>
+        <section>
+          <input
+            type="text"
+            className="border-2 border-gray-700 p-4 m-4 rounded"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+          <br></br>
+          <Button onClick={joinRoom}>Connect To Room</Button>
+          <Button onClick={sendPing}>Send Ping</Button>
+        </section>
+      </div>
+      <div className="text-center m-12">
+        <section>
+          <input
+            type="text"
+            className="border-2 border-gray-700 p-2 rounded"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <Button onClick={sendMessage}>Send Message</Button>
+        </section>
+        <p className="text-4xl">Messages</p>
+        <div id="Messages" className="border-8 overflow-scroll h-1/3 text-left">
+        </div>
+      </div>
     </>
   );
 };
